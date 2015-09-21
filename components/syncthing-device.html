@@ -1,0 +1,97 @@
+<!doctype html>
+<template id="template">
+	<style>
+		:host {
+		  display: block;
+		  padding-top:10px;
+		  padding-bottom:10px;
+		  color:rgba(255,255,255,0.7);
+		  font-size:20px;
+			text-align: left;
+		  border-bottom:1px solid rgba(125,125,125,0.2);
+		  overflow:hidden;
+		  clear: both;
+		  color:rgba(0,0,0,0.6);
+		}
+
+		:host([data-status="insync"]) #status { color:#29b74e; }
+		:host([data-status="syncing"]) #status { color:#3498db; }
+		:host([data-status="syncing"]) #status::after { content: "(" attr(data-completion) "%)"; }
+		:host([data-status="disconnected"]) #status { color:#7f4bab; }
+		:host([data-status="unused"]) #status { color:#da8f0d; }
+
+		#identicon {
+		  display: inline-block;
+		  position: relative;
+		  float: left;
+		  width: 1em;
+		  height: 1em;
+		  line-height: 1em;
+		  margin-left:0.5em;
+		  margin-right:0.5em;
+		  overflow: visible;
+		  fill:rgba(0,0,0,0.6);
+		}
+
+		#identicon svg {
+		  width:100%;
+		  height:100%;
+		}
+
+		#status {
+		  display: inline-block;
+		  float:right;
+		  margin-right:0.5em;
+		}
+
+		#name {
+		  display: block;
+		  text-overflow: ellipsis;
+		  white-space: nowrap;
+		  overflow: hidden;
+		}
+	</style>
+	<div id="identicon"></div>
+	<div id="status"></div>
+	<div id="name"><content></content></div>
+</template>
+
+<script type="text/javascript" src="identicon.js"></script>
+<script>
+(function(document, currentScript) {
+	var ownerDocument = currentScript.ownerDocument;
+
+	var CustomElement = Object.create(HTMLElement.prototype);
+
+	CustomElement.createdCallback = function() {
+		var shadow = this.createShadowRoot();
+		var template = ownerDocument.querySelector('#template') || currentScript.import.querySelector('#template');
+
+		template.content ? shadow.appendChild(template.content.cloneNode(true)) : shadow.innerHTML = template.innerHTML;
+
+		this._status = shadow.getElementById('status');
+		this.attributeChangedCallback("data-status", null, this.getAttribute('data-status'));
+	};
+
+	CustomElement.attachedCallback = function() {
+		identiconSVG = Identicon(this.getAttribute('id'), 5);
+		this.shadowRoot.querySelector("#identicon").appendChild(identiconSVG);
+	};
+
+	CustomElement.attributeChangedCallback = function(attr, oldVal, newVal) {
+		if(attr == "data-status") {
+			if(newVal == "insync")
+				this._status.innerHTML = "Up to date"
+			if(newVal == "syncing")
+				this._status.innerHTML = "Syncing"
+			if(newVal == "unused")
+				this._status.innerHTML = "Unused"
+			if(newVal == "disconnected")
+				this._status.innerHTML = "Disconnected"
+		}
+	};
+
+	document.registerElement('syncthing-device', { prototype: CustomElement });
+
+})(document, (document._currentScript || document.currentScript));
+</script>

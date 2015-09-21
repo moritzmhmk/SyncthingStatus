@@ -1,0 +1,22 @@
+{
+  "name": "syncthing-status",
+  "main": "index.html",
+  "window": {
+    "show": false,
+    "frame": false,
+    "toolbar": false,
+    "transparent": true,
+    "icon": "app.icns",
+    "width": 344,
+    "height": 294,
+    "resizable": false,
+    "show_in_taskbar": false,
+    "title": ""
+  },
+  "scripts": {
+    "start": "nw ."
+  },
+  "dependencies": {
+    "node-fetch": "^1.3.2"
+  }
+}
